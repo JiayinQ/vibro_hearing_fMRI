@@ -1,0 +1,60 @@
+function nouns_to_speech(name,nouns)
+
+% PURPOSE: This function transform a list of nouns to the speech audio file read in a male voice
+% and write an audio file with the designated name
+
+% INPUT: name: the file name one wants to store the write-out audio file
+%        nouns: the list of nouns/words that will be read; ex. cities = {'Tokyo', 'Paris', 'Sydney', 'Castrop-Rauxel'};
+
+% AUTHORS: Jiayin Qu, Henning U Voss
+
+
+%
+
+% Initialize audio data array
+
+audioData = [];
+
+% Loop through each city and generate speech
+
+NET.addAssembly('System.Speech');
+
+synth = System.Speech.Synthesis.SpeechSynthesizer;
+
+for i = 1:length(nouns)
+
+    % Generate speech for the current city
+
+    tempFile = 'temp.wav';
+
+    synth.SetOutputToWaveFile(tempFile);
+
+    synth.Speak(nouns{i});
+
+    synth.SetOutputToDefaultAudioDevice();
+
+    % Read the generated speech from the temp file
+
+    [y, Fs] = audioread(tempFile);
+
+ 
+
+    % Append to audio data with a 1-second pause (Fs samples of zeros)
+
+    waittime=.2; % 200 ms
+
+    audioData = [audioData; y; zeros(Fs*waittime, 1)];
+
+end
+
+ 
+
+% Scaling
+
+audioData=audioData/std(audioData)/8;
+
+% Write the final audio data to a WAV file
+
+audiowrite(name, audioData, Fs);
+
+ 
